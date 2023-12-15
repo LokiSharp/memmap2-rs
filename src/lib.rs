@@ -1413,7 +1413,7 @@ mod test {
 
     #[cfg(unix)]
     use crate::advice::{Advice, UncheckedAdvice};
-    use std::fs::{File, OpenOptions};
+    use std::fs::{self, File, OpenOptions};
     use std::io::{Read, Write};
     use std::mem;
     #[cfg(unix)]
@@ -1569,6 +1569,30 @@ mod test {
 
         file.read_exact(&mut read).unwrap();
         assert_eq!(write, &read);
+    }
+
+    #[test]
+    fn file_remove() {
+        let tempdir = tempfile::tempdir().unwrap();
+        let path = tempdir.path().join("mmap");
+
+        let mut file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(path.clone())
+            .unwrap();
+        file.set_len(128).unwrap();
+
+        let mmap = unsafe { Mmap::map(&file) };
+
+        assert!(mmap.is_ok());
+
+        let remove_res = fs::remove_file(path.clone());
+        if remove_res.is_err() {
+            println!("remove_res: {:?}", remove_res);
+        }
+        assert!(remove_res.is_ok());
     }
 
     #[test]
