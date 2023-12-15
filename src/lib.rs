@@ -1588,10 +1588,6 @@ mod test {
 
         assert!(mmap.is_ok());
 
-        if let Ok(mmap) = mmap {
-            std::mem::drop(mmap);
-        }
-
         let remove_res = fs::remove_file(path.clone());
         if remove_res.is_err() {
             println!("remove_res: {:?}", remove_res);
